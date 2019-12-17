@@ -1,0 +1,10 @@
+bin
+db
+lcluster
+.json
+*.json
+*.log
+*.pid
+pkg
+src
+db*

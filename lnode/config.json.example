@@ -1,0 +1,19 @@
+{
+    "daemon": {
+        "pid": "/var/run/lcluster/lcluster.pid",
+        "dir": "."
+    },
+    "database": {
+      "path": "/var/lib/lcluster/node1",
+      "filesize": 16,
+      "compression": true
+    },
+    "log": {
+        "template": "/var/log/lcluster/lcluster-%Y%m%d.log",
+        "period":   86400,
+        "save":     15,
+        "level":    "info"
+    },
+    "addr": ":5001",
+    "replica": ":5002"
+}

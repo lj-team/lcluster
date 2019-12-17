@@ -1,0 +1,5 @@
+lnode
+*.json
+*.log
+*.pid
+db*

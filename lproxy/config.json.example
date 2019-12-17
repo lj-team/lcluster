@@ -1,0 +1,20 @@
+{
+    "daemon": {
+        "pid": "/var/run/lcluster/lproxy.pid",
+        "dir": "."
+    },
+    "log": {
+        "template": "/var/log/lcluster/lcluster-%Y%m%d.log",
+        "period":   86400,
+        "save":     15,
+        "level":    "info"
+    },
+    "server": {
+        "host": "127.0.0.1",
+        "port": 5501
+    },
+    "nodes": [
+        "127.0.0.1:5101"
+    ]
+}
+

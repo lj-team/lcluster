@@ -1,0 +1,12 @@
+#!/bin/bash
+
+NAME=lcluster
+LJTEAM=${GOPATH}/src/github.com/lj-team
+RPMBUILD=~/rpmbuild
+
+cd ${LJTEAM}
+
+tar -czf ./${NAME}.tar.gz ${NAME}
+rm -rf ${RPMBUILD}/SOURCES/${NAME}.tar.gz
+mv ./${NAME}.tar.gz ${RPMBUILD}/SOURCES
+rpmbuild -bb ${LJTEAM}/${NAME}/${NAME}.spec

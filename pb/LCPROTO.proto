@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+
+package pb;
+
+
+message LCPROTO {
+
+  enum Code {
+    NOP         = 0;   // default value (0 not send via protobuf)
+    RESP        = 1;   // response
+    LOG         = 2;   // replica message
+    SET         = 3;
+    SETNX       = 4;
+    GET         = 5;
+    DEC         = 6;
+    DECBY       = 7;
+    DECR        = 8;
+    DEL         = 9;
+    DELR        = 10;
+    HAS         = 11;
+    INC         = 12;
+    INCBY       = 13;
+    INCR        = 14;
+    HKILL       = 15;
+    HALL        = 16;
+    HKEYS       = 17;   // depricated. use HKEYSLIMIT
+    ZKILL       = 18;
+    ZRANGE      = 19;
+    ZRANGESIZE  = 20;
+    HKEYSLIMIT  = 21;
+    HKEYSTOTAL  = 22;
+    KEYTOTAL    = 23;
+    BITAND      = 24;
+    BITOR       = 25;
+    BITXOR      = 26;
+    HKEYSRANDOM = 27;
+    SETR        = 28;
+
+    C_SETIFMORE  = 29;
+    C_SET        = 30;
+    C_GET        = 31;
+    C_GETINT     = 32;
+    C_DEL        = 33;
+    C_INC        = 34;
+    C_DEC        = 35;
+    C_HAS        = 36;
+    C_SETNX      = 37;
+    C_BITAND     = 38;
+    C_BITOR      = 39;
+    C_BITXOR     = 40;
+    C_BITANDNOT  = 41;
+    C_ZKILL      = 42;
+    C_ZRANGE     = 43;
+    C_ZRANGESIZE = 44;
+    C_HKILL      = 45;
+    C_HKEYS      = 46;
+    C_HSIZE      = 47;
+    C_HKEYSRAND  = 48;
+    C_KEYTOTAL   = 49;
+    C_NOP        = 50;
+    C_HALL       = 51;
+  }
+
+  Code           code    = 1;
+  bytes          key     = 2;
+  bytes          value   = 3;
+  repeated bytes list    = 4;
+  int32          counter = 5;
+  bool           sync    = 6;
+  int64          ivalue  = 7;
+}
