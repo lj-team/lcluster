@@ -9,7 +9,7 @@ import (
 	"github.com/lj-team/lcluster/connect"
 )
 
-var con *connect.Proxy
+var con connect.Cluster
 
 func main() {
 

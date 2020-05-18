@@ -11,7 +11,7 @@ type Proxy struct {
 	keybuf []byte
 }
 
-func NewProxy(addrs []string) *Proxy {
+func NewProxy(addrs []string) Cluster {
 	p := &Proxy{
 		hash:   consistent.New(len(addrs)),
 		conns:  make([]*Conn, len(addrs)),

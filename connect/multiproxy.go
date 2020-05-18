@@ -9,7 +9,7 @@ import (
 )
 
 type MultiProxy struct {
-	rings map[string]*Proxy
+	rings map[string]Cluster
 }
 
 func MultiProxyFromFile(filename string) *MultiProxy {
@@ -32,7 +32,7 @@ func MultiProxyFromFile(filename string) *MultiProxy {
 		panic(err)
 	}
 
-	obj := &MultiProxy{rings: map[string]*Proxy{}}
+	obj := &MultiProxy{rings: map[string]Cluster{}}
 
 	for k, v := range conf {
 		obj.rings[k] = NewProxy(v)
@@ -45,7 +45,7 @@ func MultiProxyFromMap(conf map[string][]string) *MultiProxy {
 
 	log.Info("init lcluster rings from map")
 
-	obj := &MultiProxy{rings: map[string]*Proxy{}}
+	obj := &MultiProxy{rings: map[string]Cluster{}}
 
 	for k, v := range conf {
 		obj.rings[k] = NewProxy(v)
@@ -54,7 +54,7 @@ func MultiProxyFromMap(conf map[string][]string) *MultiProxy {
 	return obj
 }
 
-func (mp *MultiProxy) Get(name string) *Proxy {
+func (mp *MultiProxy) Get(name string) Cluster {
 
 	if p, h := mp.rings[name]; h {
 		return p
