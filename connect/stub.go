@@ -53,12 +53,18 @@ func (st *Stub) KeyTotal(n int) int {
 
 func (st *Stub) set(key, subkey []byte, value interface{}, sync bool) {
 	k := hex.EncodeToString(st.makeKey(key, subkey))
-	v := pack.Encode(value)
 
-	if len(v) == 0 {
+	if value == nil {
 		delete(st.store, k)
 	} else {
-		st.store[k] = v
+
+		v := pack.Encode(value)
+
+		if len(v) == 0 {
+			delete(st.store, k)
+		} else {
+			st.store[k] = v
+		}
 	}
 }
 
@@ -118,4 +124,97 @@ func (st *Stub) BitAnd(key, subkey []byte, value int64, sync bool) int64 {
 	}
 
 	return res
+}
+
+func (st *Stub) BitAndNot(key, subkey []byte, value int64, sync bool) int64 {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	cur := st.get(key, subkey)
+	val := pack.Bytes2Int(cur)
+
+	res := val &^ value
+	st.set(key, subkey, res, true)
+
+	if !sync {
+		return 0
+	}
+
+	return res
+}
+
+func (st *Stub) BitOr(key, subkey []byte, value int64, sync bool) int64 {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	cur := st.get(key, subkey)
+	val := pack.Bytes2Int(cur)
+
+	res := val | value
+	st.set(key, subkey, res, true)
+
+	if !sync {
+		return 0
+	}
+
+	return res
+}
+
+func (st *Stub) BitXor(key, subkey []byte, value int64, sync bool) int64 {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	cur := st.get(key, subkey)
+	val := pack.Bytes2Int(cur)
+
+	res := val ^ value
+	st.set(key, subkey, res, true)
+
+	if !sync {
+		return 0
+	}
+
+	return res
+}
+
+func (st *Stub) SetNX(key, subkey []byte, value interface{}, sync bool) bool {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	cur := st.get(key, subkey)
+	if len(cur) > 0 {
+		return false
+	}
+
+	st.set(key, subkey, value, sync)
+
+	return sync
+}
+
+func (st *Stub) GetInt(key, subkey []byte) int64 {
+	return pack.Bytes2Int(st.Get(key, subkey))
+}
+
+func (st *Stub) Has(key, subkey []byte) bool {
+	res := st.Get(key, subkey)
+	return len(res) > 0
+}
+
+func (st *Stub) Del(key, subkey []byte, sync bool) bool {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	res := st.get(key, subkey)
+	st.set(key, subkey, nil, true)
+
+	if !sync {
+		return true
+	}
+
+	return len(res) > 0
 }
