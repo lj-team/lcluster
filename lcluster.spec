@@ -1,11 +1,11 @@
 Name:           lcluster
-Version:        2.0.0
-Release:        121701
+Version:        2.1.0
+Release:        051901
 Group:          Applications/Internet
 Summary:        LevelDB cluster
 License:        MIT License
 URL:            https://www.livejournal.com
-Packager:        Mikhail Kirillov <mikkirillov@yandex.ru>
+Packager:        Mikhail Kirillov <m.kirillov@rambler-co.ru>
 Source0:        lcluster.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 Requires:       daemonize
