@@ -81,6 +81,30 @@ func TestSub(t *testing.T) {
 		}
 	}
 
+	tInc := func(k, sk []byte, val int64, wait int64) {
+		if st.Inc(k, sk, val, true) != wait {
+			t.Fatalf("Inc failed for %v %v %v %v", k, sk, val, wait)
+		}
+
+		if st.GetInt(k, sk) != wait {
+			t.Fatalf("Inc failed for %v %v %v %v", k, sk, val, wait)
+		}
+	}
+
+	tDec := func(k, sk []byte, val int64, wait int64) {
+		if st.Dec(k, sk, val, true) != wait {
+			t.Fatalf("Dec failed for %v %v %v %v", k, sk, val, wait)
+		}
+
+		if st.GetInt(k, sk) != wait {
+			t.Fatalf("Dec failed for %v %v %v %v", k, sk, val, wait)
+		}
+	}
+
+	tSeqAdd := func(seq []byte, val interface{}) {
+		st.SeqAdd(seq, val, true)
+	}
+
 	tSet(pack.Encode(int64(1)), nil, pack.Encode(int64(11)))
 	tSet(pack.Encode(int64(2)), nil, pack.Encode(int64(22)))
 	tSet(pack.Encode(int64(3)), pack.Encode(int64(4)), pack.Encode(int64(54)))
@@ -111,4 +135,42 @@ func TestSub(t *testing.T) {
 
 	tDel(pack.Encode(int64(8)), nil, true)
 	tDel(pack.Encode(int64(9)), nil, false)
+
+	tInc(pack.Encode(int64(10)), nil, 1, 1)
+	tInc(pack.Encode(int64(10)), nil, 2, 3)
+	tDec(pack.Encode(int64(10)), nil, 1, 2)
+	tDec(pack.Encode(int64(10)), nil, 1, 1)
+	tDec(pack.Encode(int64(10)), nil, 2, 0)
+
+	tSeqAdd([]byte("seq"), int64(1))
+	tSeqAdd([]byte("seq"), int64(2))
+	tSeqAdd([]byte("seq"), int64(3))
+
+	tSet([]byte("hash"), pack.Int2Bytes(1), pack.Int2Bytes(11))
+	tSet([]byte("hash"), pack.Int2Bytes(2), pack.Int2Bytes(22))
+	tSet([]byte("hash"), pack.Int2Bytes(3), pack.Int2Bytes(33))
+	tSet([]byte("hash"), pack.Int2Bytes(4), pack.Int2Bytes(44))
+	tSet([]byte("hash"), pack.Int2Bytes(5), pack.Int2Bytes(55))
+
+	keys := st.HKeysAll([]byte("hash"))
+	if len(keys) != 5 {
+		t.Fatal("HKeysAll return invalid number of elements")
+	}
+
+	for i, v := range keys {
+		if bytes.Compare(v, pack.Int2Bytes(int64(i+1))) != 0 {
+			t.Fatal("HKeysAll return invalid list")
+		}
+	}
+
+	keys = st.HKeys([]byte("hash"), 3, 1)
+	if len(keys) != 3 {
+		t.Fatal("HKeys return invalid number of elements")
+	}
+
+	for i, v := range keys {
+		if bytes.Compare(v, pack.Int2Bytes(int64(i+2))) != 0 {
+			t.Fatal("HKeys return invalid list")
+		}
+	}
 }

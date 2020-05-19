@@ -2,7 +2,10 @@ package connect
 
 import (
 	"encoding/hex"
+	"sort"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/lj-team/go-generic/encode/pack"
 )
@@ -217,4 +220,101 @@ func (st *Stub) Del(key, subkey []byte, sync bool) bool {
 	}
 
 	return len(res) > 0
+}
+
+func (st *Stub) Inc(key, subkey []byte, val int64, sync bool) int64 {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	res := st.get(key, subkey)
+	cur := pack.Bytes2Int(res)
+
+	if val > 0 {
+		cur = cur + val
+		st.set(key, subkey, pack.Int2Bytes(cur), sync)
+		if sync {
+			return cur
+		}
+	}
+
+	return val
+}
+
+func (st *Stub) Dec(key, subkey []byte, val int64, sync bool) int64 {
+
+	st.mt.Lock()
+	defer st.mt.Unlock()
+
+	res := st.get(key, subkey)
+	cur := pack.Bytes2Int(res)
+
+	if val > 0 {
+		cur = cur - val
+		if cur < 0 {
+			st.set(key, subkey, nil, sync)
+			cur = 0
+		} else {
+			st.set(key, subkey, pack.Int2Bytes(cur), sync)
+		}
+		if sync {
+			return cur
+		}
+	}
+
+	return val
+}
+
+func (st *Stub) SeqAdd(seq []byte, value interface{}, sync bool) {
+	st.Set(seq, pack.Encode(time.Now().UnixNano(), value), oneByte, sync)
+}
+
+func (st *Stub) HKeysAll(key []byte) [][]byte {
+
+	hash := hex.EncodeToString(st.makeKey(key, nil))
+
+	var list []string
+
+	for k := range st.store {
+
+		if strings.Index(k, hash) == 0 && hash != k {
+			list = append(list, k[len(hash):])
+		}
+	}
+
+	sort.Sort(sort.StringSlice(list))
+
+	var res [][]byte
+
+	for _, v := range list {
+		b, _ := hex.DecodeString(v)
+		res = append(res, b)
+	}
+
+	return res
+}
+
+func (st *Stub) HKeys(key []byte, limit, offset int64) [][]byte {
+
+	keys := st.HKeysAll(key)
+
+	if offset < 0 {
+		offset = 0
+	}
+
+	if offset >= int64(len(keys)) {
+		return [][]byte{}
+	}
+
+	keys = keys[int(offset):]
+
+	if limit <= 0 {
+		return [][]byte{}
+	}
+
+	if len(keys) > int(limit) {
+		keys = keys[:int(limit)]
+	}
+
+	return keys
 }
