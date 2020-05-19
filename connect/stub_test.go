@@ -231,4 +231,45 @@ func TestSub(t *testing.T) {
 	if len(pairs) != 0 {
 		t.Fatal("SeqKill failed")
 	}
+
+	tSet([]byte("zset"), pack.Int2Bytes(1), pack.Int2Bytes(11))
+	tSet([]byte("zset"), pack.Int2Bytes(2), pack.Int2Bytes(22))
+	tSet([]byte("zset"), pack.Int2Bytes(3), pack.Int2Bytes(33))
+	tSet([]byte("zset"), pack.Int2Bytes(4), pack.Int2Bytes(44))
+	tSet([]byte("zset"), pack.Int2Bytes(5), pack.Int2Bytes(55))
+	tSet([]byte("zset"), pack.Int2Bytes(6), pack.Int2Bytes(66))
+	tSet([]byte("zset"), pack.Int2Bytes(7), pack.Int2Bytes(77))
+	tSet([]byte("zset"), pack.Int2Bytes(8), pack.Int2Bytes(88))
+	tSet([]byte("zset"), pack.Int2Bytes(9), pack.Int2Bytes(99))
+
+	if st.HSize([]byte("zset")) != 9 {
+		t.Fatal("Set failed")
+	}
+
+	if st.ZRangeSize([]byte("zset"), 0, 10) != 0 {
+		t.Fatal("ZRangeSize failed")
+	}
+
+	if st.ZRangeSize([]byte("zset"), 10, 60) != 5 {
+		t.Fatal("ZRangeSize failed")
+	}
+
+	if st.ZRangeSize([]byte("zset"), 0, 100) != 9 {
+		t.Fatal("ZRangeSize failed")
+	}
+
+	for i, v := range st.ZRange([]byte("zset"), 10, 0, 0, 100) {
+		if v.Value != int64((9-i)*10+9-i) {
+			t.Fatal("ZRange failed")
+		}
+		if bytes.Compare(v.Key, pack.Int2Bytes(int64(9-i))) != 0 {
+			t.Fatal("ZRange failed")
+		}
+	}
+
+	st.ZKill([]byte("zset"), false)
+
+	if st.HSize([]byte("zset")) != 0 {
+		t.Fatal("ZKill failed")
+	}
 }

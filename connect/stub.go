@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"bytes"
 	"encoding/hex"
 	"sort"
 	"strings"
@@ -16,7 +17,7 @@ type Stub struct {
 	mt    sync.Mutex
 }
 
-func NewStub() *Stub {
+func NewStub() Cluster {
 
 	st := &Stub{
 		store: make(map[string][]byte, 1024),
@@ -51,8 +52,8 @@ func (st *Stub) Status() bool {
 	return true
 }
 
-func (st *Stub) KeyTotal(n int) int {
-	return len(st.store)
+func (st *Stub) KeyTotal(n int) int64 {
+	return int64(len(st.store))
 }
 
 func (st *Stub) set(key, subkey []byte, value interface{}, sync bool) {
@@ -355,11 +356,13 @@ func (st *Stub) HKeysRand(key []byte, limit int64) [][]byte {
 }
 
 func (st *Stub) HKill(key []byte, sync bool) {
-
 	for _, sk := range st.HKeysAll(key) {
 		st.Del(key, sk, sync)
 	}
+}
 
+func (st *Stub) ZKill(key []byte, sync bool) {
+	st.HKill(key, sync)
 }
 
 func (st *Stub) SeqKill(seq []byte, sync bool) {
@@ -406,4 +409,51 @@ func (st *Stub) SeqRange(seq []byte, limit, offset int64) [][]byte {
 
 func (st *Stub) SeqSize(seq []byte) int64 {
 	return st.HSize(seq)
+}
+
+func (st *Stub) ZRange(key []byte, limit, offset, min, max int64) []ZRec {
+
+	var recs []ZRec
+
+	for _, p := range st.HAll(key) {
+		val := pack.Bytes2Int(p.Value)
+		if min <= val && val <= max {
+			recs = append(recs, ZRec{Key: p.Key, Value: val})
+		}
+	}
+
+	sort.Slice(recs, func(i, j int) bool {
+		return recs[i].Value > recs[j].Value ||
+			recs[i].Value == recs[j].Value && bytes.Compare(recs[i].Key, recs[j].Key) < 0
+	})
+
+	if offset < 0 {
+		offset = 0
+	}
+
+	if len(recs) <= int(offset) {
+		return []ZRec{}
+	}
+
+	recs = recs[int(offset):]
+
+	if len(recs) > int(limit) {
+		recs = recs[:int(limit)]
+	}
+
+	return recs
+}
+
+func (st *Stub) ZRangeSize(key []byte, min, max int64) int64 {
+
+	var recs []ZRec
+
+	for _, p := range st.HAll(key) {
+		val := pack.Bytes2Int(p.Value)
+		if min <= val && val <= max {
+			recs = append(recs, ZRec{Key: p.Key, Value: val})
+		}
+	}
+
+	return int64(len(recs))
 }
