@@ -35,7 +35,7 @@ func main() {
 		log.Info("start application")
 	}
 
-	PROXY = connect.NewProxy(cfg.Nodes)
+	PROXY = connect.NewProxy(cfg.Nodes).(*connect.Proxy)
 
 	srv := &server.Server{
 		Addr:     cfg.Server,
