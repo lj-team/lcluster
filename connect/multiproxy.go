@@ -12,6 +12,18 @@ type MultiProxy struct {
 	rings map[string]Cluster
 }
 
+func FakeMultiProxy(src []string) *MultiProxy {
+	px := &MultiProxy{
+		rings: make(map[string]Cluster),
+	}
+
+	for _, rec := range src {
+		px.rings[rec] = NewStub()
+	}
+
+	return px
+}
+
 func MultiProxyFromFile(filename string) *MultiProxy {
 
 	log.Info("init lcluster rings from " + filename)

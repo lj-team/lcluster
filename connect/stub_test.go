@@ -9,7 +9,9 @@ import (
 
 func TestSub(t *testing.T) {
 
-	st := NewStub()
+	fp := FakeMultiProxy([]string{"t1", "t2", "t3"})
+
+	st := fp.Get("t1")
 	if st == nil {
 		t.Fatal("NewStub failed")
 	}
