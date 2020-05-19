@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/lj-team/go-generic/encode/pack"
+	"github.com/lj-team/go-generic/slice"
 )
 
 type Stub struct {
@@ -317,4 +318,92 @@ func (st *Stub) HKeys(key []byte, limit, offset int64) [][]byte {
 	}
 
 	return keys
+}
+
+func (st *Stub) HAll(key []byte) []Pair {
+
+	keys := st.HKeysAll(key)
+
+	var pairs []Pair
+
+	for _, sk := range keys {
+		pairs = append(pairs, Pair{Key: sk, Value: st.Get(key, sk)})
+	}
+
+	return pairs
+}
+
+func (st *Stub) HKeysRand(key []byte, limit int64) [][]byte {
+
+	if limit < 1 {
+		return nil
+	}
+
+	keys := st.HKeysAll(key)
+
+	if len(keys) <= 1 {
+		return keys
+	}
+
+	slice.Shuffle(keys)
+
+	if len(keys) > int(limit) {
+		keys = keys[:int(limit)]
+	}
+
+	return keys
+}
+
+func (st *Stub) HKill(key []byte, sync bool) {
+
+	for _, sk := range st.HKeysAll(key) {
+		st.Del(key, sk, sync)
+	}
+
+}
+
+func (st *Stub) SeqKill(seq []byte, sync bool) {
+	st.HKill(seq, sync)
+}
+
+func (st *Stub) HSize(key []byte) int64 {
+	keys := st.HKeysAll(key)
+	return int64(len(keys))
+}
+
+func (st *Stub) SeqRange(seq []byte, limit, offset int64) [][]byte {
+
+	if limit < 1 {
+		return [][]byte{}
+	}
+
+	keys := st.HKeysAll(seq)
+	if offset < 0 {
+		offset = 0
+	}
+
+	if len(keys) <= int(offset) {
+		return [][]byte{}
+	}
+
+	keys = keys[int(offset):]
+	if len(keys) > int(limit) {
+		keys = keys[:int(limit)]
+	}
+
+	res := make([][]byte, 0, len(keys))
+
+	for _, v := range keys {
+		if len(v) < 9 {
+			continue
+		}
+
+		res = append(res, v[8:])
+	}
+
+	return res
+}
+
+func (st *Stub) SeqSize(seq []byte) int64 {
+	return st.HSize(seq)
 }

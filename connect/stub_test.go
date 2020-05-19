@@ -173,4 +173,62 @@ func TestSub(t *testing.T) {
 			t.Fatal("HKeys return invalid list")
 		}
 	}
+
+	pairs := st.HAll([]byte("hash"))
+
+	if len(pairs) != 5 {
+		t.Fatal("HAll failed")
+	}
+
+	for i, v := range pairs {
+
+		if bytes.Compare(pack.Int2Bytes(int64(i+1)), v.Key) != 0 {
+			t.Fatal("HAll invalid key")
+		}
+
+		if bytes.Compare(pack.Int2Bytes(int64((i+1)*10+i+1)), v.Value) != 0 {
+			t.Fatal("HAll invalid key")
+		}
+	}
+
+	keys = st.HKeysRand([]byte("hash"), 3)
+	if len(keys) != 3 {
+		t.Fatal("HKeysRand failed")
+	}
+
+	if st.HSize([]byte("hash")) != 5 {
+		t.Fatal("HSize failed")
+	}
+
+	st.HKill([]byte("hash"), false)
+
+	pairs = st.HAll([]byte("hash"))
+	if len(pairs) != 0 {
+		t.Fatal("HKill failed")
+	}
+
+	if st.HSize([]byte("hash")) != 0 {
+		t.Fatal("HSize failed")
+	}
+
+	keys = st.SeqRange([]byte("seq"), 2, 1)
+	if len(keys) != 2 {
+		t.Fatal("SeqRange failed")
+	}
+
+	for i, v := range keys {
+		if bytes.Compare(v, pack.Int2Bytes(int64(i+2))) != 0 {
+			t.Fatal("SeqRange failed")
+		}
+	}
+
+	if st.SeqSize([]byte("seq")) != 3 {
+		t.Fatal("SeqSize failed")
+	}
+
+	st.SeqKill([]byte("seq"), false)
+	pairs = st.HAll([]byte("seq"))
+	if len(pairs) != 0 {
+		t.Fatal("SeqKill failed")
+	}
 }
