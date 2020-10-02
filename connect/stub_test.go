@@ -274,4 +274,14 @@ func TestSub(t *testing.T) {
 	if st.HSize([]byte("zset")) != 0 {
 		t.Fatal("ZKill failed")
 	}
+
+	if !st.Status() {
+		t.Fatal("Status failed")
+	}
+
+	for i := 0; i < 10; i++ {
+		if st.KeyTotal(i) != 4 {
+			t.Fatal("KeyTotal failed")
+		}
+	}
 }
