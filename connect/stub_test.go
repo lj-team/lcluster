@@ -11,6 +11,12 @@ func TestSub(t *testing.T) {
 
 	fp := FakeMultiProxy([]string{"t1", "t2", "t3"})
 
+	fp.SetCluster("fring", NewStub())
+
+	if fp.Get("fring") == nil {
+		t.Fatal("SetCluster failed")
+	}
+
 	st := fp.Get("t1")
 	if st == nil {
 		t.Fatal("NewStub failed")

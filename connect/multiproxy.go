@@ -74,3 +74,7 @@ func (mp *MultiProxy) Get(name string) Cluster {
 
 	return nil
 }
+
+func (mp *MultiProxy) SetCluster(name string, px Cluster) {
+	mp.rings[name] = px
+}
