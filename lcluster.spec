@@ -49,7 +49,7 @@ install -p -m 0755 ./lnode/config.json.example %{buildroot}%{_sysconfdir}/lclust
 install -p -m 0755 ./lproxy/config.json.example %{buildroot}%{_sysconfdir}/lcluster/proxy.json.example
 
 install -p -m 0755 ./lnode/init.d %{buildroot}%{_sysconfdir}/init.d/lnode.example
-install -p -m 0755 ./lnode/init.d %{buildroot}%{_sysconfdir}/init.d/lproxy.example
+install -p -m 0755 ./lproxy/init.d %{buildroot}%{_sysconfdir}/init.d/lproxy.example
 
 %files
 %defattr(-,root,root,-)
